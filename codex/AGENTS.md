@@ -1,0 +1,23 @@
+# Global Working Agreements
+
+- Use `AGENTS.md` files before ad hoc prompting. Prefer repository guidance over generic behavior when both exist.
+- If a repository also provides `CLAUDE.md`, respect it through the configured fallback filenames.
+- Inspect the codebase before editing. Follow existing conventions unless there is a clear defect or a documented better pattern.
+- For existing or legacy projects, preserve the current architecture and structural organization strictly; do not re-architect, rename, or reshuffle folders/modules unless explicitly requested.
+- Always preserve UTF-8 encoding for any created or edited text file. Never change encoding to ANSI/Windows-1252/ISO-8859-1 and never introduce mojibake.
+- For pt-BR content, keep accents and cedilla intact (e.g., ç, ã, á, é, í, ó, ú). If encoding corruption is detected, fix it before finishing.
+- Prefer small, reviewable diffs over broad rewrites.
+- For non-trivial work, break the task into workstreams, sequence dependencies clearly, and parallelize safe discovery steps.
+- Run the relevant tests, lint, or build checks after code changes when the project provides them. If you cannot validate, say so explicitly.
+- Ask before destructive actions, schema changes, or adding new production dependencies.
+- For review requests, lead with findings ordered by severity and include concrete file references.
+- The checked-in Codex skills live under `codex/.agents/skills/` and install into `~/.codex/skills`.
+- Use installed skills proactively when the task matches them:
+	- `enterprise-code-architect` for design, refactors, API shape, and production-grade implementation.
+	- `orchestrator` for multi-step or multi-file workflows that need planning, implementation, review, and validation.
+	- `code-reviewer` for bug hunts, regression checks, and quality audits.
+	- `performance-auditor` for latency, throughput, memory, CPU, and query efficiency analysis.
+	- `security-auditor` for vulnerability analysis, attack-surface review, and hardening work.
+	- `security-fix` for targeted remediation after security findings.
+- Keep solutions production-grade: clear boundaries, strong error handling, observability, and low coupling.
+- Prefer early returns and lookup tables over deeply nested conditionals when writing code.

@@ -20,6 +20,7 @@ Then apply the GLOBAL RULES below.
 9. When code is requested, output only raw code — nothing else.
 10. When explanations are requested, provide plain, concise text — no code.
 11. Always prefer early returns instead of using else statements, and always prefer hashmap/lookup tables instead of using switch cases and if-else statements in chains.
+12. In existing or legacy projects, follow the current architecture and structural organization strictly to avoid regressions; do not reorganize modules, folders, or layering unless explicitly requested.
 
 ---
 

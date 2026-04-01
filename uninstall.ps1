@@ -2,6 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
 $CodexHome = Join-Path $env:USERPROFILE ".codex"
+$CodexSkillsHome = Join-Path $CodexHome "skills"
 
 function Write-Info($msg) { Write-Host "[OK] $msg" -ForegroundColor Green }
 
@@ -13,6 +14,7 @@ Write-Host ""
 Write-Host "This will remove AI skill configs from:" -ForegroundColor Yellow
 Write-Host "  Claude: $ClaudeHome"
 Write-Host "  Codex:  $CodexHome"
+Write-Host "  Skills: $CodexSkillsHome"
 Write-Host ""
 $confirm = Read-Host "Are you sure? [y/N]"
 if ($confirm -ne "y" -and $confirm -ne "Y") {
@@ -40,13 +42,14 @@ foreach ($dir in @("agents", "commands", "memory")) {
     $path = Join-Path $ClaudeHome $dir
     if (Test-Path $path) {
         Get-ChildItem -Path $path -Filter "*.md" | Remove-Item -Force
-        Write-Info "Cleared $dir\"
+        Write-Info "Cleared $dir/"
     }
 }
 
 $codexFiles = @(
     (Join-Path $CodexHome "config.toml"),
-    (Join-Path $CodexHome "instructions.md")
+    (Join-Path $CodexHome "instructions.md"),
+    (Join-Path $CodexHome "AGENTS.md")
 )
 
 foreach ($f in $codexFiles) {
@@ -59,7 +62,15 @@ foreach ($f in $codexFiles) {
 $rulesDir = Join-Path $CodexHome "rules"
 if (Test-Path $rulesDir) {
     Get-ChildItem -Path $rulesDir | Remove-Item -Force
-    Write-Info "Cleared codex rules\"
+    Write-Info "Cleared codex rules/"
+}
+
+foreach ($skill in @("orchestrator", "enterprise-code-architect", "code-reviewer", "security-auditor", "security-fix", "performance-auditor")) {
+    $skillPath = Join-Path $CodexSkillsHome $skill
+    if (Test-Path $skillPath) {
+        Remove-Item $skillPath -Recurse -Force
+        Write-Info "Removed skill $skill"
+    }
 }
 
 Write-Host ""

@@ -2,6 +2,12 @@ model = "gpt-5.4"
 model_reasoning_effort = "high"
 sandbox_permissions = ["disk-full-read-access", "disk-write-access"]
 personality = "pragmatic"
+service_tier = "fast"
+project_doc_fallback_filenames = ["CLAUDE.md"]
+project_doc_max_bytes = 65536
+
+[features]
+fast_mode = true
 
 [notice.model_migrations]
 "gpt-5.1-codex-max" = "gpt-5.2-codex"

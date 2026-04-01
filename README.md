@@ -1,43 +1,53 @@
 # AI Skills
 
-Colecao de configuracoes, prompts, agentes, regras e scripts para padronizar o uso de `Claude Code` e `Codex` no mesmo ambiente.
+Coleção de configurações, prompts, agentes, regras e scripts para padronizar o uso de `Claude Code` e `Codex` no mesmo ambiente.
 
-O projeto instala um conjunto opinionado de arquivos em `~/.claude` e `~/.codex` para acelerar tarefas de engenharia, revisao, seguranca, orquestracao de agentes e pipelines de desenvolvimento.
+O projeto mantém os arquivos específicos do Codex em `codex/.agents/skills` e instala o resultado em `~/.codex/skills`, enquanto Claude continua em `~/.claude` e a guidance global do Codex em `~/.codex`.
 
-## O que este projeto e
+## Fonte oficial do Codex
 
-Este repositorio funciona como um pacote de bootstrap para CLIs de IA.
+- Fonte de regras globais do Codex no repositório: `codex/AGENTS.md`
+- Destino instalado na máquina: `~/.codex/AGENTS.md`
+- Fonte dos skills do Codex no repositório: `codex/.agents/skills/`
+- Destino instalado dos skills: `~/.codex/skills`
+- Papel do `AGENTS.md` na raiz: regras do repositório (não substitui o global do Codex)
+
+## O que este projeto é
+
+Este repositório funciona como um pacote de bootstrap para CLIs de IA.
 
 - Para `Claude Code`, ele instala:
   - prompts globais
   - agentes especializados
   - comandos prontos
-  - memorias operacionais
-  - script de orquestracao multiagente
-  - configuracoes de plugins e permissoes
+  - memórias operacionais
+  - script de orquestração multiagente
 - Para `Codex`, ele instala:
+  - `AGENTS.md` global
   - `config.toml`
-  - instrucoes globais
-  - regras reutilizaveis
+  - skills de usuário
+  - regras reutilizáveis
 
-## Visao geral
+## Visão geral
 
 ```mermaid
 flowchart LR
-    Repo["Repositorio ai-skills"] --> Install["install.sh / install.ps1"]
+    Repo["Repositório ai-skills"] --> Install["install.sh / install.ps1"]
+  Repo --> CodexSource["codex/.agents/skills/"]
     Install --> ClaudeHome["~/.claude"]
     Install --> CodexHome["~/.codex"]
+    Install --> SkillsHome["~/.codex/skills"]
 
     ClaudeHome --> ClaudeCore["CLAUDE.md, GO.md, TYPESCRIPT.md"]
     ClaudeHome --> ClaudeAgents["agents/"]
     ClaudeHome --> ClaudeCommands["commands/"]
     ClaudeHome --> ClaudeMemory["memory/"]
     ClaudeHome --> ClaudeScripts["scripts/orchestrate.py"]
-    ClaudeHome --> ClaudePlugins["plugins/ e settings*.json"]
-
     CodexHome --> CodexConfig["config.toml"]
-    CodexHome --> CodexInstructions["instructions.md"]
+    CodexHome --> CodexAgents["AGENTS.md"]
     CodexHome --> CodexRules["rules/"]
+    CodexSource --> SkillsHome
+    SkillsHome --> CodexInstalledSkills["orchestrator, reviewer, security, performance..."]
 ```
 
 ## Como funciona
@@ -45,65 +55,72 @@ flowchart LR
 ```mermaid
 flowchart TD
     A["Executar instalador"] --> B["Verifica se claude/codex existem no PATH"]
-    B --> C["Cria diretorios em ~/.claude e ~/.codex"]
+    B --> C["Cria diretórios em ~/.claude, ~/.codex e ~/.codex/skills"]
     C --> D["Faz backup de arquivos existentes com .bak.TIMESTAMP"]
-    D --> E["Copia configuracoes do repositorio"]
-    E --> F["Pergunta sobre settings.local.json"]
-    F --> G["Pergunta sobre configs de plugins"]
-    G --> H["Finaliza e mostra proximos passos"]
+    D --> E["Copia os artefatos do repositório"]
+    E --> F["Finaliza e mostra próximos passos"]
 ```
 
-## Estrutura do repositorio
+## Estrutura do repositório
 
 ```text
 .
+|-- AGENTS.md
 |-- claude/
 |   |-- agents/       # agentes especializados
-|   |-- commands/     # comandos prontos, incluindo BMAD e seguranca
-|   |-- memory/       # memorias e feedbacks operacionais
-|   |-- plugins/      # plugins, blocklist e marketplaces
-|   |-- scripts/      # utilitarios como orchestrate.py
+|   |-- commands/     # comandos prontos, incluindo BMAD e segurança
+|   |-- memory/       # memórias e feedbacks operacionais
+|   |-- scripts/      # utilitários como orchestrate.py
 |   |-- CLAUDE.md
 |   |-- GO.md
 |   `-- TYPESCRIPT.md
 |-- codex/
 |   |-- rules/
+|   |-- AGENTS.md
 |   |-- config.toml
-|   `-- instructions.md
+|   |-- instructions.md
+|   `-- .agents/
+|       `-- skills/
+|           |-- code-reviewer/
+|           |-- enterprise-code-architect/
+|           |-- orchestrator/
+|           |-- performance-auditor/
+|           |-- security-auditor/
+|           `-- security-fix/
 |-- install.sh
 |-- install.ps1
 |-- uninstall.sh
 `-- uninstall.ps1
 ```
 
-## O que sera instalado
+## O que será instalado
 
 ### Claude Code
 
 - `CLAUDE.md` com regras globais de comportamento.
-- `GO.md` e `TYPESCRIPT.md` com padroes por linguagem.
+- `GO.md` e `TYPESCRIPT.md` com padrões por linguagem.
 - Agentes como `orchestrator`, `code-reviewer`, `security-auditor` e `performance-auditor`.
-- Comandos para fluxo BMAD, review e seguranca.
+- Comandos para fluxo BMAD, review e segurança.
 - Script `orchestrate.py` para pipelines como `feature`, `review`, `refactor`, `security` e `new-service`.
-- `settings.json` e, opcionalmente, `settings.local.json`.
-- Configuracoes de plugins, tambem opcionais.
 
 ### Codex
 
-- `config.toml` com modelo, effort e permissoes padrao.
-- `instructions.md` com regras globais de engenharia.
-- Regras em `codex/rules/`, incluindo padroes e checklist de auditoria de seguranca.
+- `AGENTS.md` com regras globais persistentes para o Codex.
+- `config.toml` com modelo, effort, `service_tier = "fast"` e fallback para `CLAUDE.md`.
+- Skills do Codex em `codex/.agents/skills` instaladas em `~/.codex/skills` para arquitetura, orquestração, review, segurança e performance.
+- Regras em `codex/rules/`, incluindo padrões e checklist de auditoria de segurança.
+- Regras globais críticas já incluídas: preservação de arquitetura em projetos legados e proteção de encoding UTF-8 para pt-BR.
 
-## Pre-requisitos
+## Pré-requisitos
 
-- Ter `Claude Code` e/ou `Codex` instalados na maquina.
-- Ter permissao para gravar em `~/.claude` e `~/.codex`.
+- Ter `Claude Code` e/ou `Codex` instalados na máquina.
+- Ter permissão para gravar em `~/.claude`, `~/.codex` e `~/.codex/skills`.
 - Em sistemas Unix, executar scripts com `bash`.
 - Em Windows, executar os scripts em PowerShell.
 
-Se os CLIs nao estiverem instalados, o instalador ainda prepara os arquivos, mas voce precisara instalar e autenticar as ferramentas depois.
+Se os CLIs não estiverem instalados, o instalador ainda prepara os arquivos, mas você precisará instalar e autenticar as ferramentas depois.
 
-## Passo a passo de instalacao
+## Passo a passo de instalação
 
 ### macOS e Linux
 
@@ -114,10 +131,7 @@ Se os CLIs nao estiverem instalados, o instalador ainda prepara os arquivos, mas
 bash install.sh
 ```
 
-3. Responda se deseja instalar:
-   - `settings.local.json`
-   - configuracoes de plugins
-4. Ao final, valide:
+3. Ao final, valide:
 
 ```bash
 claude
@@ -133,25 +147,41 @@ codex
 ./install.ps1
 ```
 
-3. Responda as perguntas opcionais sobre:
-   - `settings.local.json`
-   - configuracoes de plugins
-4. Ao final, valide:
+3. Ao final, valide:
 
 ```powershell
 claude
 codex
 ```
 
+## Checklist rápido pós-instalação
+
+1. Confirmar arquivo global do Codex instalado:
+
+```powershell
+Get-Content "$env:USERPROFILE\.codex\AGENTS.md" -TotalCount 20
+```
+
+2. Confirmar skills instalados:
+
+```powershell
+Get-ChildItem "$env:USERPROFILE\.codex\skills"
+```
+
+3. No Codex, pedir para listar instruções ativas e verificar se aparecem as regras de:
+- preservação de arquitetura para projetos legados
+- UTF-8 obrigatório e preservação de acentuação pt-BR
+
 ## Passo a passo de uso
 
 1. Instale os arquivos com `install.sh` ou `install.ps1`.
 2. Abra o `Claude Code` para carregar `~/.claude`.
-3. Abra o `Codex` para carregar `~/.codex`.
-4. Autentique as ferramentas, se necessario.
-5. No `Codex`, ajuste manualmente os projetos confiaveis em `~/.codex/config.toml`.
-6. Use o `Claude Code` com os agentes e comandos instalados.
-7. Quando precisar de pipeline multiagente, execute o script:
+3. Abra o `Codex` para carregar `~/.codex/AGENTS.md`.
+4. Verifique se os skills do Codex foram instalados em `~/.codex/skills`.
+5. Autentique as ferramentas, se necessário.
+6. No `Codex`, ajuste manualmente os projetos confiáveis em `~/.codex/config.toml`.
+7. Use o `Claude Code` com os agentes e comandos instalados.
+8. Quando precisar de pipeline multiagente, execute o script:
 
 ```bash
 python3 ~/.claude/scripts/orchestrate.py --pipeline feature --prompt "Sua tarefa"
@@ -165,26 +195,26 @@ python3 ~/.claude/scripts/orchestrate.py --pipeline feature --prompt "Sua tarefa
 python3 ~/.claude/scripts/orchestrate.py --pipeline feature --prompt "Adicionar rate limiting na API"
 ```
 
-### Rodar revisao de codigo
+### Rodar revisão de código
 
 ```bash
 python3 ~/.claude/scripts/orchestrate.py --pipeline review --path ./src
 ```
 
-### Rodar auditoria de seguranca
+### Rodar auditoria de segurança
 
 ```bash
 python3 ~/.claude/scripts/orchestrate.py --pipeline security --path ./src
 ```
 
-## Backup e seguranca operacional
+## Backup e segurança operacional
 
-- Se ja existirem arquivos com o mesmo nome em `~/.claude` ou `~/.codex`, o instalador cria backup com sufixo `.bak.<timestamp>`.
-- O projeto nao sincroniza tokens de autenticacao.
-- Em uma maquina nova, voce ainda precisa rodar o login das ferramentas, por exemplo `codex auth`.
-- `settings.local.json` e opcional porque pode conter permissoes especificas da maquina.
+- Se já existirem arquivos com o mesmo nome em `~/.claude` ou `~/.codex`, o instalador cria backup com sufixo `.bak.<timestamp>`.
+- Se já existirem arquivos ou skills com o mesmo nome em `~/.codex/skills`, o instalador também cria backup antes de sobrescrever.
+- O projeto não sincroniza tokens de autenticação.
+- Em uma máquina nova, você ainda precisa rodar o login das ferramentas, por exemplo `codex auth`.
 
-## Desinstalacao
+## Desinstalação
 
 ### macOS e Linux
 
@@ -198,17 +228,17 @@ bash uninstall.sh
 ./uninstall.ps1
 ```
 
-Os scripts removem os arquivos instalados, mas nao apagam os backups `.bak.*`.
+Os scripts removem os arquivos instalados, mas não apagam os backups `.bak.*`.
 
 ## Quando usar este projeto
 
-Use este repositorio quando voce quiser:
+Use este repositório quando você quiser:
 
 - padronizar o comportamento do `Claude Code` e do `Codex`
-- reaproveitar agentes, comandos e regras em varias maquinas
+- reaproveitar agentes, comandos e regras em várias máquinas
 - reduzir setup manual
-- ter um baseline de engenharia, review e seguranca pronto para uso
+- ter um baseline de engenharia, review e segurança pronto para uso
 
 ## Resumo
 
-`ai-skills` e um kit de configuracao para acelerar o setup de assistentes de codigo com regras consistentes, agentes especializados e instalacao reproduzivel em macOS, Linux e Windows.
+`ai-skills` é um kit de configuração para acelerar o setup de assistentes de código com regras consistentes, agentes especializados e instalação reproduzível em macOS, Linux e Windows.
