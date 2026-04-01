@@ -243,13 +243,27 @@ python3 ~/.claude/scripts/orchestrate.py --pipeline security --path ./src
 bash uninstall.sh
 ```
 
+Modo não interativo:
+
+```bash
+bash uninstall.sh --force
+```
+
 ### Windows
 
 ```powershell
 ./uninstall.ps1
 ```
 
-Os scripts removem os arquivos instalados, mas não apagam os backups `.bak.*`.
+Modo não interativo:
+
+```powershell
+./uninstall.ps1 -Force
+```
+
+Os scripts removem somente os caminhos registrados no manifesto de instalação (`~/.codex/ai-skills-manifest.txt`) para evitar apagar conteúdo não gerenciado.
+
+Se havia conteúdo pré-existente sobrescrito no install, o uninstall restaura automaticamente a partir dos backups `.bak.*`.
 
 ## Quando usar este projeto
 

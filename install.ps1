@@ -4,18 +4,31 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
 $CodexHome = Join-Path $env:USERPROFILE ".codex"
 $CodexSkillsHome = Join-Path $CodexHome "skills"
+$ManifestPath = Join-Path $CodexHome "ai-skills-manifest.txt"
 $BackupSuffix = Get-Date -Format "yyyyMMdd_HHmmss"
+$ManifestEntries = [System.Collections.Generic.List[string]]::new()
 
 function Write-Info($msg)  { Write-Host "[OK] $msg" -ForegroundColor Green }
 function Write-Warn($msg)  { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
 function Write-Err($msg)   { Write-Host "[ERROR] $msg" -ForegroundColor Red; exit 1 }
+
+function Add-ManifestEntry($path, $backup) {
+    if (-not [string]::IsNullOrWhiteSpace($path)) {
+        if ($null -eq $backup) {
+            $backup = ""
+        }
+        $ManifestEntries.Add("$path`t$backup")
+    }
+}
 
 function Backup-IfExists($target) {
     if (Test-Path $target) {
         $backup = "${target}.bak.${BackupSuffix}"
         Copy-Item -Path $target -Destination $backup -Recurse -Force
         Write-Warn "Backed up $(Split-Path -Leaf $target) -> $(Split-Path -Leaf $backup)"
+        return $backup
     }
+    return ""
 }
 
 function Copy-ConfigFile($src, $dest) {
@@ -23,8 +36,9 @@ function Copy-ConfigFile($src, $dest) {
         Write-Warn "Source not found: $src (skipping)"
         return
     }
-    Backup-IfExists $dest
+    $backup = Backup-IfExists $dest
     Copy-Item -Path $src -Destination $dest -Force
+    Add-ManifestEntry $dest $backup
     Write-Info "Installed $(Split-Path -Leaf $dest)"
 }
 
@@ -36,35 +50,26 @@ function Copy-DirEntries($src, $dest) {
     if (-not (Test-Path $dest)) {
         New-Item -ItemType Directory -Path $dest -Force | Out-Null
     }
-    $entries = Get-ChildItem -Path $src
+    $entries = Get-ChildItem -Path $src -Force
     $count = 0
     foreach ($entry in $entries) {
         $destEntry = Join-Path $dest $entry.Name
-        Backup-IfExists $destEntry
+        $backup = Backup-IfExists $destEntry
         if (Test-Path $destEntry) {
             Remove-Item $destEntry -Recurse -Force
         }
         Copy-Item -Path $entry.FullName -Destination $destEntry -Recurse -Force
+        Add-ManifestEntry $destEntry $backup
         $count++
     }
     Write-Info "Installed $count entries into $(Split-Path -Leaf $dest)/"
 }
 
-function Test-CodexSkillsInstalled($skillsHome) {
-    $required = @(
-        ".system\skill-creator",
-        ".system\skill-installer",
-        "code-reviewer",
-        "enterprise-code-architect",
-        "openai-docs",
-        "orchestrator",
-        "performance-auditor",
-        "screenshot",
-        "security-auditor",
-        "security-fix",
-        "speech",
-        "transcribe"
-    )
+function Test-CodexSkillsInstalled($skillsSource, $skillsHome) {
+    if (-not (Test-Path $skillsSource)) {
+        return @()
+    }
+    $required = Get-ChildItem -Path $skillsSource | Select-Object -ExpandProperty Name
     $missing = @()
     foreach ($skill in $required) {
         $skillFile = Join-Path $skillsHome "$skill\SKILL.md"
@@ -126,7 +131,20 @@ Copy-ConfigFile (Join-Path $ScriptDir "codex\AGENTS.md")          (Join-Path $Co
 Copy-DirEntries (Join-Path $ScriptDir "codex\rules")     (Join-Path $CodexHome "rules")
 Copy-DirEntries (Join-Path $ScriptDir "codex\.agents\skills")  $CodexSkillsHome
 
-$missingSkills = Test-CodexSkillsInstalled $CodexSkillsHome
+$manifestByPath = @{}
+foreach ($entry in $ManifestEntries) {
+    $parts = $entry -split "`t", 2
+    $path = $parts[0]
+    $backup = if ($parts.Count -gt 1) { $parts[1] } else { "" }
+    $manifestByPath[$path] = $backup
+}
+$manifestLines = foreach ($path in $manifestByPath.Keys) {
+    "$path`t$($manifestByPath[$path])"
+}
+$manifestLines | Set-Content -Path $ManifestPath -Encoding UTF8
+Write-Info "Wrote install manifest: $ManifestPath"
+
+$missingSkills = Test-CodexSkillsInstalled (Join-Path $ScriptDir "codex\.agents\skills") $CodexSkillsHome
 if ($missingSkills.Count -eq 0) {
     Write-Info "Verified Codex skills in $CodexSkillsHome"
 } else {

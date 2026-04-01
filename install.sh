@@ -5,7 +5,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLAUDE_HOME="${HOME}/.claude"
 CODEX_HOME="${HOME}/.codex"
 CODEX_SKILLS_HOME="${CODEX_HOME}/skills"
+MANIFEST_PATH="${CODEX_HOME}/ai-skills-manifest.txt"
 BACKUP_SUFFIX="$(date +%Y%m%d_%H%M%S)"
+declare -a MANIFEST_ENTRIES=()
+BACKUP_PATH=""
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -16,12 +19,20 @@ info()  { echo -e "${GREEN}[OK]${NC} $1"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error() { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
+add_manifest_entry() {
+    local path="$1"
+    local backup="$2"
+    [ -n "$path" ] && MANIFEST_ENTRIES+=("${path}\t${backup}")
+}
+
 backup_if_exists() {
     local target="$1"
+    BACKUP_PATH=""
     if [ -e "$target" ]; then
         local backup="${target}.bak.${BACKUP_SUFFIX}"
         cp -r "$target" "$backup"
         warn "Backed up existing $(basename "$target") -> $(basename "$backup")"
+        BACKUP_PATH="$backup"
     fi
 }
 
@@ -34,6 +45,7 @@ copy_file() {
     fi
     backup_if_exists "$dest"
     cp "$src" "$dest"
+    add_manifest_entry "$dest" "$BACKUP_PATH"
     info "Installed $(basename "$dest")"
 }
 
@@ -45,36 +57,31 @@ copy_dir_entries() {
         return
     fi
     mkdir -p "$dest"
+    shopt -s dotglob nullglob
     local count=0
     for f in "$src"/*; do
-        [ -e "$f" ] || continue
         local basename="$(basename "$f")"
         backup_if_exists "$dest/$basename"
         rm -rf "$dest/$basename"
         cp -R "$f" "$dest/$basename"
+        add_manifest_entry "$dest/$basename" "$BACKUP_PATH"
         count=$((count + 1))
     done
+    shopt -u dotglob nullglob
     info "Installed $count entries into $(basename "$dest")/"
 }
 
 verify_codex_skills() {
-    local skills_home="$1"
-    local required=(
-        .system/skill-creator
-        .system/skill-installer
-        code-reviewer
-        enterprise-code-architect
-        openai-docs
-        orchestrator
-        performance-auditor
-        screenshot
-        security-auditor
-        security-fix
-        speech
-        transcribe
-    )
+    local skills_source="$1"
+    local skills_home="$2"
+    if [ ! -d "$skills_source" ]; then
+        return
+    fi
     local missing=()
-    for skill in "${required[@]}"; do
+    for source_path in "$skills_source"/*; do
+        [ -e "$source_path" ] || continue
+        local skill
+        skill="$(basename "$source_path")"
         if [ ! -f "$skills_home/$skill/SKILL.md" ]; then
             missing+=("$skill")
         fi
@@ -84,6 +91,12 @@ verify_codex_skills() {
     else
         warn "Codex skills missing after install: ${missing[*]}"
     fi
+}
+
+write_manifest() {
+    mkdir -p "$(dirname "$MANIFEST_PATH")"
+    printf '%b\n' "${MANIFEST_ENTRIES[@]}" | awk -F '\t' 'NF { m[$1]=$2 } END { for (k in m) printf "%s\t%s\n", k, m[k] }' > "$MANIFEST_PATH"
+    info "Wrote install manifest: $MANIFEST_PATH"
 }
 
 echo ""
@@ -126,7 +139,8 @@ copy_file "$SCRIPT_DIR/codex/AGENTS.md"          "$CODEX_HOME/AGENTS.md"
 
 copy_dir_entries "$SCRIPT_DIR/codex/rules"      "$CODEX_HOME/rules"
 copy_dir_entries "$SCRIPT_DIR/codex/.agents/skills"   "$CODEX_SKILLS_HOME"
-verify_codex_skills "$CODEX_SKILLS_HOME"
+write_manifest
+verify_codex_skills "$SCRIPT_DIR/codex/.agents/skills" "$CODEX_SKILLS_HOME"
 
 echo ""
 echo "================================================"

@@ -9,6 +9,7 @@ fi
 CLAUDE_HOME="${HOME}/.claude"
 CODEX_HOME="${HOME}/.codex"
 CODEX_SKILLS_HOME="${CODEX_HOME}/skills"
+MANIFEST_PATH="${CODEX_HOME}/ai-skills-manifest.txt"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -27,6 +28,7 @@ echo -e "${YELLOW}This will remove AI skill configs from:${NC}"
 echo "  Claude: $CLAUDE_HOME"
 echo "  Codex:  $CODEX_HOME"
 echo "  Skills: $CODEX_SKILLS_HOME"
+echo "  Manifest: $MANIFEST_PATH"
 echo ""
 if [ "$FORCE" -ne 1 ]; then
     read -rp "Are you sure? [y/N]: " confirm
@@ -40,55 +42,35 @@ fi
 
 echo ""
 
-CLAUDE_FILES=(
-    "$CLAUDE_HOME/CLAUDE.md"
-    "$CLAUDE_HOME/GO.md"
-    "$CLAUDE_HOME/TYPESCRIPT.md"
-    "$CLAUDE_HOME/scripts/orchestrate.py"
-)
-
-for f in "${CLAUDE_FILES[@]}"; do
-    if [ -f "$f" ]; then
-        rm "$f"
-        info "Removed $(basename "$f")"
-    fi
-done
-
-for dir in agents commands memory; do
-    target="$CLAUDE_HOME/$dir"
-    if [ -d "$target" ] && [ "$(ls -A "$target" 2>/dev/null)" ]; then
-        rm -f "$target"/*.md
-        info "Cleared $dir/"
-    fi
-done
-
-CODEX_FILES=(
-    "$CODEX_HOME/config.toml"
-    "$CODEX_HOME/instructions.md"
-    "$CODEX_HOME/AGENTS.md"
-)
-
-for f in "${CODEX_FILES[@]}"; do
-    if [ -f "$f" ]; then
-        rm "$f"
-        info "Removed $(basename "$f")"
-    fi
-done
-
-if [ -d "$CODEX_HOME/rules" ] && [ "$(ls -A "$CODEX_HOME/rules" 2>/dev/null)" ]; then
-    rm -rf "$CODEX_HOME/rules"/*
-    info "Cleared codex rules/"
+if [ ! -f "$MANIFEST_PATH" ]; then
+    warn "No install manifest found. Nothing will be removed to avoid deleting unmanaged files."
+    echo ""
+    exit 0
 fi
 
-for skill in orchestrator enterprise-code-architect code-reviewer security-auditor security-fix performance-auditor; do
-    skill_path="$CODEX_SKILLS_HOME/$skill"
-    if [ -d "$skill_path" ]; then
-        rm -rf "$skill_path"
-        info "Removed skill $skill"
+while IFS=$'\t' read -r path backup; do
+    [ -n "$path" ] || continue
+    if [ -e "$path" ]; then
+        if [ -d "$path" ]; then
+            rm -rf "$path"
+        else
+            rm -f "$path"
+        fi
+        info "Removed $(basename "$path")"
     fi
-done
+
+    if [ -n "${backup:-}" ] && [ -e "$backup" ]; then
+        mkdir -p "$(dirname "$path")"
+        mv "$backup" "$path"
+        info "Restored $(basename "$path") from backup"
+    fi
+done < <(awk -F '\t' 'NF { print length($1) "\t" $0 }' "$MANIFEST_PATH" | sort -rn -k1,1 | cut -f2-)
+
+rm -f "$MANIFEST_PATH"
+info "Removed install manifest"
 
 echo ""
 echo -e "${GREEN}Uninstall complete.${NC}"
 echo "Note: Backup files (.bak.*) were NOT removed."
 echo ""
+exit 0
