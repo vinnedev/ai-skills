@@ -1,3 +1,7 @@
+param(
+    [switch]$Force
+)
+
 $ErrorActionPreference = "Stop"
 
 $ClaudeHome = Join-Path $env:USERPROFILE ".claude"
@@ -16,10 +20,14 @@ Write-Host "  Claude: $ClaudeHome"
 Write-Host "  Codex:  $CodexHome"
 Write-Host "  Skills: $CodexSkillsHome"
 Write-Host ""
-$confirm = Read-Host "Are you sure? [y/N]"
-if ($confirm -ne "y" -and $confirm -ne "Y") {
-    Write-Host "Aborted."
-    exit 0
+if (-not $Force) {
+    $confirm = Read-Host "Are you sure? [y/N]"
+    if ($confirm -ne "y" -and $confirm -ne "Y") {
+        Write-Host "Aborted."
+        exit 0
+    }
+} else {
+    Write-Host "Running in force mode (no confirmation prompt)." -ForegroundColor Yellow
 }
 
 Write-Host ""
@@ -61,7 +69,7 @@ foreach ($f in $codexFiles) {
 
 $rulesDir = Join-Path $CodexHome "rules"
 if (Test-Path $rulesDir) {
-    Get-ChildItem -Path $rulesDir | Remove-Item -Force
+    Get-ChildItem -Path $rulesDir | Remove-Item -Recurse -Force
     Write-Info "Cleared codex rules/"
 }
 

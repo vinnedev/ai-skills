@@ -12,12 +12,21 @@
 - Ask before destructive actions, schema changes, or adding new production dependencies.
 - For review requests, lead with findings ordered by severity and include concrete file references.
 - The checked-in Codex skills live under `codex/.agents/skills/` and install into `~/.codex/skills`.
-- Use installed skills proactively when the task matches them:
-	- `enterprise-code-architect` for design, refactors, API shape, and production-grade implementation.
-	- `orchestrator` for multi-step or multi-file workflows that need planning, implementation, review, and validation.
-	- `code-reviewer` for bug hunts, regression checks, and quality audits.
-	- `performance-auditor` for latency, throughput, memory, CPU, and query efficiency analysis.
-	- `security-auditor` for vulnerability analysis, attack-surface review, and hardening work.
-	- `security-fix` for targeted remediation after security findings.
+- Automatically route tasks to matching installed skills by default. Do not wait for the user to explicitly name the skill when the task clearly matches one or more installed skills.
+- When multiple skills match, choose the minimal set that covers the task and use them in a sensible order instead of applying everything.
+- Prefer the following skill routing defaults:
+	- `enterprise-code-architect` for architecture analysis, design, refactors, API shape, cross-layer feature planning, and production-grade implementation.
+	- `orchestrator` for multi-step or multi-file workflows that need analysis, planning, implementation, review, and validation.
+	- `code-reviewer` for bug hunts, regression checks, PR review, code quality audits, and post-implementation review.
+	- `performance-auditor` for latency, throughput, memory, CPU, bundle size, rendering cost, and query efficiency analysis.
+	- `security-auditor` for vulnerability analysis, attack-surface review, secure defaults, and hardening recommendations.
+	- `security-fix` for targeted remediation after security findings or when the user asks to fix a confirmed vulnerability.
+	- `openai-docs` for any task involving OpenAI products, APIs, SDKs, limits, or official documentation.
+	- `screenshot` when the user asks for a desktop, app-window, or region screenshot.
+	- `speech` for text-to-speech, narration, accessibility reads, or voiceover generation.
+	- `transcribe` for transcription, diarization, speaker labeling, or extracting text from audio/video.
+	- `skill-creator` when the user wants to create or improve a Codex skill.
+	- `skill-installer` when the user wants to list, install, or update Codex skills.
+- Treat the installed skills in `~/.codex/skills` as available defaults unless a repository-specific `AGENTS.md` explicitly restricts or overrides their usage.
 - Keep solutions production-grade: clear boundaries, strong error handling, observability, and low coupling.
 - Prefer early returns and lookup tables over deeply nested conditionals when writing code.

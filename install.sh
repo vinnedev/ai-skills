@@ -60,12 +60,18 @@ copy_dir_entries() {
 verify_codex_skills() {
     local skills_home="$1"
     local required=(
+        .system/skill-creator
+        .system/skill-installer
         code-reviewer
         enterprise-code-architect
+        openai-docs
         orchestrator
         performance-auditor
+        screenshot
         security-auditor
         security-fix
+        speech
+        transcribe
     )
     local missing=()
     for skill in "${required[@]}"; do

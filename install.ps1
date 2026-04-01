@@ -52,12 +52,18 @@ function Copy-DirEntries($src, $dest) {
 
 function Test-CodexSkillsInstalled($skillsHome) {
     $required = @(
+        ".system\skill-creator",
+        ".system\skill-installer",
         "code-reviewer",
         "enterprise-code-architect",
+        "openai-docs",
         "orchestrator",
         "performance-auditor",
+        "screenshot",
         "security-auditor",
-        "security-fix"
+        "security-fix",
+        "speech",
+        "transcribe"
     )
     $missing = @()
     foreach ($skill in $required) {

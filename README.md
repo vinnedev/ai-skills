@@ -107,7 +107,7 @@ flowchart TD
 
 - `AGENTS.md` com regras globais persistentes para o Codex.
 - `config.toml` com modelo, effort, `service_tier = "fast"` e fallback para `CLAUDE.md`.
-- Skills do Codex em `codex/.agents/skills` instaladas em `~/.codex/skills` para arquitetura, orquestração, review, segurança e performance.
+- Skills do Codex em `codex/.agents/skills` instaladas em `~/.codex/skills` para arquitetura, orquestração, review, segurança, performance, docs oficiais da OpenAI, screenshot, speech e transcribe.
 - Regras em `codex/rules/`, incluindo padrões e checklist de auditoria de segurança.
 - Regras globais críticas já incluídas: preservação de arquitetura em projetos legados e proteção de encoding UTF-8 para pt-BR.
 
@@ -171,6 +171,27 @@ Get-ChildItem "$env:USERPROFILE\.codex\skills"
 3. No Codex, pedir para listar instruções ativas e verificar se aparecem as regras de:
 - preservação de arquitetura para projetos legados
 - UTF-8 obrigatório e preservação de acentuação pt-BR
+- roteamento automático para skills instaladas por padrão
+
+4. Confirmar skills principais instaladas:
+
+```powershell
+Get-ChildItem "$env:USERPROFILE\.codex\skills" | Select-Object Name
+```
+
+Os itens esperados do pacote do repositório incluem:
+- `.system/skill-creator`
+- `.system/skill-installer`
+- `code-reviewer`
+- `enterprise-code-architect`
+- `openai-docs`
+- `orchestrator`
+- `performance-auditor`
+- `screenshot`
+- `security-auditor`
+- `security-fix`
+- `speech`
+- `transcribe`
 
 ## Passo a passo de uso
 
