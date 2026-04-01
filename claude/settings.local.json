@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvim --version)",
+      "Bash(find ~/.config/nvim/lua -type f -name *.lua)",
+      "Bash(codex --version)",
+      "Bash(claude --version)",
+      "Bash(find ~/.claude -name *.json -not -path */projects/*)",
+      "Bash(find ~/Library/Application Support -name claude* -maxdepth 3)",
+      "Bash(nvim --headless -c \"lua require\\(''''lazy''''\\).load\\({plugins = {}}\\)\" -c \"q\")",
+      "Bash(nvim --headless -c \"checkhealth\" -c \"q\")",
+      "Bash(nvim --headless -c \"lua vim.cmd\\(''''messages''''\\)\" -c \"q\")",
+      "Bash(nvim --headless --noplugin)",
+      "Bash(nvim -c \"q\")",
+      "Bash(git -C ~/.local/share/nvim/lazy/LuaSnip submodule status)",
+      "Bash(git:*)",
+      "Bash(pmset -g)",
+      "Bash(system_profiler SPDisplaysDataType)",
+      "Bash(sudo pmset:*)"
+    ]
+  }
+}
