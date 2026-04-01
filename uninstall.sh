@@ -33,12 +33,7 @@ CLAUDE_FILES=(
     "$CLAUDE_HOME/CLAUDE.md"
     "$CLAUDE_HOME/GO.md"
     "$CLAUDE_HOME/TYPESCRIPT.md"
-    "$CLAUDE_HOME/settings.json"
-    "$CLAUDE_HOME/settings.local.json"
     "$CLAUDE_HOME/scripts/orchestrate.py"
-    "$CLAUDE_HOME/plugins/installed_plugins.json"
-    "$CLAUDE_HOME/plugins/blocklist.json"
-    "$CLAUDE_HOME/plugins/known_marketplaces.json"
 )
 
 for f in "${CLAUDE_FILES[@]}"; do

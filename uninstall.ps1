@@ -26,12 +26,7 @@ $claudeFiles = @(
     (Join-Path $ClaudeHome "CLAUDE.md"),
     (Join-Path $ClaudeHome "GO.md"),
     (Join-Path $ClaudeHome "TYPESCRIPT.md"),
-    (Join-Path $ClaudeHome "settings.json"),
-    (Join-Path $ClaudeHome "settings.local.json"),
-    (Join-Path $ClaudeHome "scripts\orchestrate.py"),
-    (Join-Path $ClaudeHome "plugins\installed_plugins.json"),
-    (Join-Path $ClaudeHome "plugins\blocklist.json"),
-    (Join-Path $ClaudeHome "plugins\known_marketplaces.json")
+    (Join-Path $ClaudeHome "scripts\orchestrate.py")
 )
 
 foreach ($f in $claudeFiles) {

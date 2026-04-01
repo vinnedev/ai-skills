@@ -70,20 +70,11 @@ fi
 echo "--- Claude Code Configuration ---"
 echo ""
 
-mkdir -p "$CLAUDE_HOME"/{agents,commands,scripts,memory,plugins}
+mkdir -p "$CLAUDE_HOME"/{agents,commands,scripts,memory}
 
 copy_file "$SCRIPT_DIR/claude/CLAUDE.md"       "$CLAUDE_HOME/CLAUDE.md"
 copy_file "$SCRIPT_DIR/claude/GO.md"            "$CLAUDE_HOME/GO.md"
 copy_file "$SCRIPT_DIR/claude/TYPESCRIPT.md"    "$CLAUDE_HOME/TYPESCRIPT.md"
-copy_file "$SCRIPT_DIR/claude/settings.json"    "$CLAUDE_HOME/settings.json"
-
-echo ""
-read -rp "Install settings.local.json? (contains machine-specific permissions) [y/N]: " install_local
-if [[ "$install_local" =~ ^[Yy]$ ]]; then
-    copy_file "$SCRIPT_DIR/claude/settings.local.json" "$CLAUDE_HOME/settings.local.json"
-else
-    info "Skipped settings.local.json"
-fi
 
 echo ""
 copy_dir_contents "$SCRIPT_DIR/claude/agents"   "$CLAUDE_HOME/agents"
@@ -94,20 +85,10 @@ copy_file "$SCRIPT_DIR/claude/scripts/orchestrate.py" "$CLAUDE_HOME/scripts/orch
 chmod +x "$CLAUDE_HOME/scripts/orchestrate.py"
 
 echo ""
-read -rp "Install plugin configs? (installed_plugins, blocklist, marketplaces) [y/N]: " install_plugins
-if [[ "$install_plugins" =~ ^[Yy]$ ]]; then
-    copy_file "$SCRIPT_DIR/claude/plugins/installed_plugins.json"   "$CLAUDE_HOME/plugins/installed_plugins.json"
-    copy_file "$SCRIPT_DIR/claude/plugins/blocklist.json"           "$CLAUDE_HOME/plugins/blocklist.json"
-    copy_file "$SCRIPT_DIR/claude/plugins/known_marketplaces.json"  "$CLAUDE_HOME/plugins/known_marketplaces.json"
-else
-    info "Skipped plugin configs"
-fi
-
-echo ""
 echo "--- Codex CLI Configuration ---"
 echo ""
 
-mkdir -p "$CODEX_HOME"/{rules,skills}
+mkdir -p "$CODEX_HOME"/rules
 
 copy_file "$SCRIPT_DIR/codex/config.toml"       "$CODEX_HOME/config.toml"
 copy_file "$SCRIPT_DIR/codex/instructions.md"    "$CODEX_HOME/instructions.md"

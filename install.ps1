@@ -63,7 +63,7 @@ if (-not $claudeExists -and -not $codexExists) {
 Write-Host "--- Claude Code Configuration ---"
 Write-Host ""
 
-foreach ($dir in @("agents", "commands", "scripts", "memory", "plugins")) {
+foreach ($dir in @("agents", "commands", "scripts", "memory")) {
     $path = Join-Path $ClaudeHome $dir
     if (-not (Test-Path $path)) {
         New-Item -ItemType Directory -Path $path -Force | Out-Null
@@ -73,15 +73,6 @@ foreach ($dir in @("agents", "commands", "scripts", "memory", "plugins")) {
 Copy-ConfigFile (Join-Path $ScriptDir "claude\CLAUDE.md")       (Join-Path $ClaudeHome "CLAUDE.md")
 Copy-ConfigFile (Join-Path $ScriptDir "claude\GO.md")            (Join-Path $ClaudeHome "GO.md")
 Copy-ConfigFile (Join-Path $ScriptDir "claude\TYPESCRIPT.md")    (Join-Path $ClaudeHome "TYPESCRIPT.md")
-Copy-ConfigFile (Join-Path $ScriptDir "claude\settings.json")    (Join-Path $ClaudeHome "settings.json")
-
-Write-Host ""
-$installLocal = Read-Host "Install settings.local.json? (contains machine-specific permissions) [y/N]"
-if ($installLocal -eq "y" -or $installLocal -eq "Y") {
-    Copy-ConfigFile (Join-Path $ScriptDir "claude\settings.local.json") (Join-Path $ClaudeHome "settings.local.json")
-} else {
-    Write-Info "Skipped settings.local.json"
-}
 
 Write-Host ""
 Copy-DirContents (Join-Path $ScriptDir "claude\agents")   (Join-Path $ClaudeHome "agents")
@@ -91,20 +82,10 @@ Copy-DirContents (Join-Path $ScriptDir "claude\memory")    (Join-Path $ClaudeHom
 Copy-ConfigFile (Join-Path $ScriptDir "claude\scripts\orchestrate.py") (Join-Path $ClaudeHome "scripts\orchestrate.py")
 
 Write-Host ""
-$installPlugins = Read-Host "Install plugin configs? (installed_plugins, blocklist, marketplaces) [y/N]"
-if ($installPlugins -eq "y" -or $installPlugins -eq "Y") {
-    Copy-ConfigFile (Join-Path $ScriptDir "claude\plugins\installed_plugins.json")   (Join-Path $ClaudeHome "plugins\installed_plugins.json")
-    Copy-ConfigFile (Join-Path $ScriptDir "claude\plugins\blocklist.json")           (Join-Path $ClaudeHome "plugins\blocklist.json")
-    Copy-ConfigFile (Join-Path $ScriptDir "claude\plugins\known_marketplaces.json")  (Join-Path $ClaudeHome "plugins\known_marketplaces.json")
-} else {
-    Write-Info "Skipped plugin configs"
-}
-
-Write-Host ""
 Write-Host "--- Codex CLI Configuration ---"
 Write-Host ""
 
-foreach ($dir in @("rules", "skills")) {
+foreach ($dir in @("rules")) {
     $path = Join-Path $CodexHome $dir
     if (-not (Test-Path $path)) {
         New-Item -ItemType Directory -Path $path -Force | Out-Null
