@@ -18,3 +18,4 @@ paste-cache/
 file-history/
 stats-cache.json
 mcp-needs-auth-cache.json
+.claude
